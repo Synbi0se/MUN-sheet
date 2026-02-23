@@ -3,20 +3,15 @@ from google.oauth2.service_account import Credentials
 from supabase import create_client
 import os
 
-# === TES SHEETS (remplace par tes vrais IDs) ===
+# === TES 2 SHEETS (mets tes vrais IDs ici) ===
 SHEETS_IDS = [
-    '1ABC...ID_SHEET_1',
-    '1DEF...ID_SHEET_2',
-    # ajoute tous tes sheets
+    '1ABC123xyzDEF456ghi...',  # Sheet 1 ID (dans l'URL)
+    '1XYZ789uvwRST012klm...'   # Sheet 2 ID (dans l'URL)
 ]
-SHEET_NAME = "Sheet1"
-
-# === SUPABASE ===
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+SHEET_NAME = "Sheet1"  # ou le nom de ton onglet
 
 def main():
-    # 1. Google Sheets
+    # Google Sheets
     scopes = ['https://www.googleapis.com/auth/spreadsheets']
     creds = Credentials.from_service_account_info({
         "type": "service_account",
@@ -33,24 +28,27 @@ def main():
     
     client = gspread.authorize(creds)
     
-    # 2. Fusionner TOUS les sheets
+    # Fusionner les 2 sheets
     all_data = []
-    for sheet_id in SHEETS_IDS:
+    for i, sheet_id in enumerate(SHEETS_IDS, 1):
+        print(f"📖 Lecture Sheet {i}: {sheet_id}")
         sheet = client.open_by_key(sheet_id).worksheet(SHEET_NAME)
         rows = sheet.get_all_records()
-        for row in rows:
+        
+        for row in rows[1:]:  # Skip header
             all_data.append({
                 "mail": row.get("mail", row.get("email", "")).lower().strip(),
-                "committee": row.get("comité", row.get("committee", "")),
-                "attrib": row.get("attribution", row.get("attrib", ""))
+                "committee": row.get("comité", row.get("committee", row.get("comite", ""))),
+                "attrib": row.get("attribution", row.get("attrib", row.get("attribu", "")))
             })
     
-    print(f"📊 Fusion: {len(all_data)} lignes de {len(SHEETS_IDS)} sheets")
+    print(f"📊 Fusion: {len(all_data)} lignes de 2 sheets")
     
-    # 3. Supabase
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    # Supabase
+    supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
     response = supabase.table('Attribution 2026').upsert(all_data).execute()
     print(f"✅ {len(all_data)} lignes synchronisées !")
+    print(f"Supabase response: {response}")
 
 if __name__ == "__main__":
     main()
