@@ -3,12 +3,11 @@ from google.oauth2.service_account import Credentials
 from supabase import create_client
 import os
 
-# === TES 2 SHEETS (mets tes vrais IDs ici) ===
 SHEETS_IDS = [
     '1ABC123xyzDEF456ghi...',  # Sheet 1 ID (dans l'URL)
     '1XYZ789uvwRST012klm...'   # Sheet 2 ID (dans l'URL)
 ]
-SHEET_NAME = "Sheet1"  # ou le nom de ton onglet
+SHEET_NAME = "chaumun.eu"
 
 def main():
     # Google Sheets
