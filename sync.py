@@ -32,33 +32,22 @@ def main():
         sheet = client.open_by_key(sheet_id).worksheet(SHEET_NAME)
         rows = sheet.get_all_values()  # Toutes les cellules
         
-        for row in rows[1:]:  # Skip header
-            # Convertir en string et joindre
+        for row in rows:
             line = ','.join(str(cell) for cell in row) + '\n'
             if (line != ',,\n' and '@' in line and ',,' not in line):
                 L.append(line.strip())
     
     print(f"📊 {len(L)} lignes filtrées de {len(SHEETS_IDS)} sheets")
     
-    import csv
-    import io
-    
     all_data = []
-    csv_file = io.StringIO()
-    for line in L:
-        csv_file.write(line + '\n')
-    csv_file.seek(0)
-    
-    reader = csv.DictReader(csv_file)
-    for row in reader:
-        current_row = str(row)
-        if '@' in current_row and "'committee': '', 'attrib': ''}" not in current_row: 
-            all_data.append({
-                "mail": row.get("mail", "").lower().strip(),
-                "committee": row.get("committee", row.get("comité", "")),
-                "attrib": row.get("attrib", row.get("attribution", ""))
-            })
-    
+    for row in L:
+        [mail,committee,attrib] =row.rsplit(",")
+        all_data.append({
+            "mail": mail,
+            "committee": committee,
+            "attrib": attrib
+        })
+
     # Supabase
     try :
         supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
