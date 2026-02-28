@@ -4,13 +4,12 @@ from supabase import create_client
 import os
 
 SHEETS_IDS = [
-    '1ABC123xyzDEF456ghi...',  # Sheet 1 ID (dans l'URL)
-    '1XYZ789uvwRST012klm...'   # Sheet 2 ID (dans l'URL)
+    '1j24ofOVLaJgBexKr95yCe8cYch1cz-ApxhjC-GG6i8w',
+    '1sGikSRzfWdiD8mNfAbSPMDsy0oyd5tmYX94KvonPTtg',
 ]
 SHEET_NAME = "chaumun.eu"
 
 def main():
-    # Google Sheets
     scopes = ['https://www.googleapis.com/auth/spreadsheets']
     creds = Credentials.from_service_account_info({
         "type": "service_account",
@@ -26,28 +25,49 @@ def main():
     }, scopes=scopes)
     
     client = gspread.authorize(creds)
+    L = []
     
-    # Fusionner les 2 sheets
-    all_data = []
     for i, sheet_id in enumerate(SHEETS_IDS, 1):
         print(f"📖 Lecture Sheet {i}: {sheet_id}")
         sheet = client.open_by_key(sheet_id).worksheet(SHEET_NAME)
-        rows = sheet.get_all_records()
+        rows = sheet.get_all_values()  # Toutes les cellules
         
         for row in rows[1:]:  # Skip header
-            all_data.append({
-                "mail": row.get("mail", row.get("email", "")).lower().strip(),
-                "committee": row.get("comité", row.get("committee", row.get("comite", ""))),
-                "attrib": row.get("attribution", row.get("attrib", row.get("attribu", "")))
-            })
+            # Convertir en string et joindre
+            line = ','.join(str(cell) for cell in row) + '\n'
+            if (line != ',,\n' and '@' in line and ',,' not in line):
+                L.append(line.strip())
     
-    print(f"📊 Fusion: {len(all_data)} lignes de 2 sheets")
+    print(f"📊 {len(L)} lignes filtrées de {len(SHEETS_IDS)} sheets")
+    
+    # Écrire temporairement (comme ton script)
+    with open('attrib.csv', 'w') as F:
+        F.write('mail,committee,attrib\n')
+        for line in L:
+            F.write(line + '\n')
+    
+    # Convertir CSV → Supabase
+    import csv
+    import io
+    
+    all_data = []
+    csv_file = io.StringIO()
+    for line in L:
+        csv_file.write(line + '\n')
+    csv_file.seek(0)
+    
+    reader = csv.DictReader(csv_file)
+    for row in reader:
+        all_data.append({
+            "mail": row.get("mail", "").lower().strip(),
+            "committee": row.get("committee", row.get("comité", "")),
+            "attrib": row.get("attrib", row.get("attribution", ""))
+        })
     
     # Supabase
     supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
     response = supabase.table('Attribution 2026').upsert(all_data).execute()
     print(f"✅ {len(all_data)} lignes synchronisées !")
-    print(f"Supabase response: {response}")
-
+    
 if __name__ == "__main__":
     main()
