@@ -40,13 +40,6 @@ def main():
     
     print(f"📊 {len(L)} lignes filtrées de {len(SHEETS_IDS)} sheets")
     
-    # Écrire temporairement (comme ton script)
-    with open('attrib.csv', 'w') as F:
-        F.write('mail,committee,attrib\n')
-        for line in L:
-            F.write(line + '\n')
-    
-    # Convertir CSV → Supabase
     import csv
     import io
     
@@ -58,16 +51,21 @@ def main():
     
     reader = csv.DictReader(csv_file)
     for row in reader:
-        all_data.append({
-            "mail": row.get("mail", "").lower().strip(),
-            "committee": row.get("committee", row.get("comité", "")),
-            "attrib": row.get("attrib", row.get("attribution", ""))
-        })
+        current_row = str(row)
+        if '@' in current_row and "'committee': '', 'attrib': ''}" not in current_row: 
+            all_data.append({
+                "mail": row.get("mail", "").lower().strip(),
+                "committee": row.get("committee", row.get("comité", "")),
+                "attrib": row.get("attrib", row.get("attribution", ""))
+            })
     
     # Supabase
-    supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
-    response = supabase.table('Attribution 2026').upsert(all_data).execute()
-    print(f"✅ {len(all_data)} lignes synchronisées !")
+    try :
+        supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
+        response = supabase.table('Attribution 2026').upsert(all_data).execute()
+        print(f"✅ {len(all_data)} lignes synchronisées !")
+    except :
+        print("❌ Erreur lors de l'actualisation Supabase.")
     
 if __name__ == "__main__":
     main()
