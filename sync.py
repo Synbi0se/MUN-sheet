@@ -50,8 +50,9 @@ def main():
 
     # Supabase
     try :
-        supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
-        response = supabase.table('Attribution 2026').upsert(all_data).execute()
+        supabase = create_client("SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY")
+        supabase.table('Attribution 2026').delete().neq('mail', 'NEVERMATCH').execute()
+        response = supabase.table('Attribution 2026').insert(all_data).execute()
         print(f"✅ {len(all_data)} lignes synchronisées !")
     except :
         print("❌ Erreur lors de l'actualisation Supabase.")
