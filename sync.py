@@ -41,7 +41,7 @@ def main():
     
     all_data = []
     for row in L:
-        [mail,committee,attrib] =row.rsplit(",")
+        [mail,committee,attrib] = row.rsplit(",")
         all_data.append({
             "mail": mail,
             "committee": committee,
@@ -51,7 +51,9 @@ def main():
     # Supabase
     try :
         supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
+        print("⌛ Connecté à Supabase,")
         supabase.table('Attribution 2026').delete().neq('mail', 'NEVERMATCH').execute()
+        print("Supression temporaire,")
         response = supabase.table('Attribution 2026').insert(all_data).execute()
         print(f"✅ {len(all_data)} lignes synchronisées !")
     except :
