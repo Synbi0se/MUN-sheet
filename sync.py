@@ -1,6 +1,6 @@
 import gspread
 from google.oauth2.service_account import Credentials
-from supabase import create_client
+from supabase import create_client, Client
 import os
 
 SHEETS_IDS = [
@@ -49,14 +49,16 @@ def main():
         })
 
     # Supabase
-    supabase_url = os.getenv("SUPABASE_URL")
-    service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    supabase_url: str = os.environ.get("SUPABASE_URL")
+    service_key: str = os.environ.get("SUPABASE_KEY")
 
     print(f"🔍 URL: {supabase_url[:10]}..." if supabase_url else "❌ SUPABASE_URL vide")
     print(f"🔍 Key: {'OK' if service_key else '❌ vide'}")
 
     supabase = create_client(supabase_url, service_key)
     print("⌛ Connecté à Supabase,")
+
+    supabase: Client = create_client(supabase_url, service_key)
 
     supabase.table('Attribution 2026').delete().neq('mail', 'NEVERMATCH').execute()
     print("Supression temporaire,")
