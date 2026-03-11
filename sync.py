@@ -52,16 +52,14 @@ def main():
     supabase_url: str = os.environ.get("SUPABASE_URL")
     service_key: str = os.environ.get("SUPABASE_KEY")
 
-    print(f"🔍 URL: {supabase_url[:10]}..." if supabase_url else "❌ SUPABASE_URL vide")
+    print(f"🔍 URL: {supabase_url[:15]}..." if supabase_url else "❌ SUPABASE_URL vide")
     print(f"🔍 Key: {'OK' if service_key else '❌ vide'}")
 
-    supabase = create_client(supabase_url, service_key)
-    print("⌛ Connecté à Supabase,")
-
     supabase: Client = create_client(supabase_url, service_key)
+    print("⌛ Connecté à Supabase")
 
     supabase.table('Attribution 2026').delete().neq('mail', 'NEVERMATCH').execute()
-    print("Supression temporaire,")
+    print("⌛ Supression temporaire,")
     
     response = supabase.table('Attribution 2026').insert(all_data).execute()
     print(f"✅ {len(all_data)} lignes synchronisées !")
