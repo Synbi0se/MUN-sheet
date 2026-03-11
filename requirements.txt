@@ -1,3 +1,4 @@
 supabase==2.8.1
 gotrue==2.8.1
 postgrest==0.17.0
+gspread==6.1.2
