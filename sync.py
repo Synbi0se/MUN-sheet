@@ -49,15 +49,20 @@ def main():
         })
 
     # Supabase
-    try :
-        supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
-        print("⌛ Connecté à Supabase,")
-        supabase.table('Attribution 2026').delete().neq('mail', 'NEVERMATCH').execute()
-        print("Supression temporaire,")
-        response = supabase.table('Attribution 2026').insert(all_data).execute()
-        print(f"✅ {len(all_data)} lignes synchronisées !")
-    except :
-        print("❌ Erreur lors de l'actualisation Supabase.")
+    supabase_url = os.getenv("SUPABASE_URL")
+    service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+
+    print(f"🔍 URL: {supabase_url[:10]}..." if supabase_url else "❌ SUPABASE_URL vide")
+    print(f"🔍 Key: {'OK' if service_key else '❌ vide'}")
+
+    supabase = create_client(supabase_url, service_key)
+    print("⌛ Connecté à Supabase,")
+
+    supabase.table('Attribution 2026').delete().neq('mail', 'NEVERMATCH').execute()
+    print("Supression temporaire,")
+    
+    response = supabase.table('Attribution 2026').insert(all_data).execute()
+    print(f"✅ {len(all_data)} lignes synchronisées !")
     
 if __name__ == "__main__":
     main()
