@@ -27,10 +27,11 @@ def main():
     client = gspread.authorize(creds)
     L = []
     
+    # Sheets Google
     for i, sheet_id in enumerate(SHEETS_IDS, 1):
         print(f"📖 Lecture Sheet {i}: {sheet_id}")
         sheet = client.open_by_key(sheet_id).worksheet(SHEET_NAME)
-        rows = sheet.get_all_values()  # Toutes les cellules
+        rows = sheet.get_all_values()
         
         for row in rows:
             line = ','.join(str(cell) for cell in row) + '\n'
@@ -56,11 +57,7 @@ def main():
     print(f"🔍 Key: {'OK' if service_key else '❌ vide'}")
 
     supabase: Client = create_client(supabase_url, service_key)
-    print("⌛ Connecté à Supabase")
-
     supabase.table('Attribution 2026').delete().neq('mail', 'NEVERMATCH').execute()
-    print("⌛ Supression temporaire,")
-    
     response = supabase.table('Attribution 2026').insert(all_data).execute()
     print(f"✅ {len(all_data)} lignes synchronisées !")
     
