@@ -1,8 +1,8 @@
 name: Sync Sheets → Supabase
 
 on:
-  schedule:
-    - cron: '0 7 * * *'  # Tous les jours à 7h (heure Paris)
+#  schedule:
+#    - cron: '0 7 * * *'  # Tous les jours à 7h (heure Paris)
   workflow_dispatch:  # Bouton manuel dans GitHub
   push:
     branches:
